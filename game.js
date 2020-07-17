@@ -1,5 +1,7 @@
 let game = {
     ctx: null,
+    platform: null,
+    ball: null,
     sprites: {
         background: null,
         ball: null,
@@ -42,8 +44,8 @@ let game = {
     render: function () {
         // Что именно будем отрисовывать
         this.ctx.drawImage(this.sprites.background, 0, 0);
-        this.ctx.drawImage(this.sprites.ball, 0, 0);
-        this.ctx.drawImage(this.sprites.platform, 0, 0);
+        this.ctx.drawImage(this.sprites.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
+        this.ctx.drawImage(this.sprites.platform, this.platform.x, this.platform.y);
 
     },
 
@@ -53,6 +55,19 @@ let game = {
             this.run();
         });
     }
+};
+
+// Исходные значения местоположения на канвасе
+game.ball = {
+    x: 320,
+    y: 280,
+    width: 20,
+    height: 20
+}
+
+game.platform = {
+    x: 280,
+    y: 300
 };
 
 // Объект window на который установлен обработчик событий
