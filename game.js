@@ -1,6 +1,7 @@
 const keys = {
     left: 37,
-    right: 39
+    right: 39,
+    space: 32
 };
 
 let game = {
@@ -10,7 +11,8 @@ let game = {
     blocks: [],
     rows: 4,
     cols: 8,
-
+    width: 640,
+    height: 360,
     sprites: {
         background: null,
         ball: null,
@@ -26,7 +28,10 @@ let game = {
     // Двигаем платформу
     setEvents() {
         window.addEventListener('keydown', e => {
-            if (e.keyCode === keys.left || e.keyCode === keys.right) {
+            if (e.keyCode === keys.space) {
+                this.platform.fire();
+            }
+            else if (e.keyCode === keys.left || e.keyCode === keys.right) {
                 this.platform.start(e.keyCode);
             }
         });
@@ -55,6 +60,7 @@ let game = {
             this.sprites[key].addEventListener('load', onImageLoad);
         }
     },
+
     create: function () {
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
@@ -68,6 +74,7 @@ let game = {
     // Изменения в игровом поле
     update: function () {
         this.platform.move();
+        this.ball.move();
     },
 
     run: function () {
@@ -81,6 +88,7 @@ let game = {
 
     render: function () {
         // Что именно будем отрисовывать
+        this.ctx.clearRect(0, 0, this.width, this.height);
         this.ctx.drawImage(this.sprites.background, 0, 0);
         this.ctx.drawImage(this.sprites.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
         this.ctx.drawImage(this.sprites.platform, this.platform.x, this.platform.y);
@@ -99,15 +107,36 @@ let game = {
             this.create();
             this.run();
         });
+    },
+
+    random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 };
 
 // Исходные значения местоположения на канвасе
 game.ball = {
+    dx: 0,
+    dy: 0,
+    velocity: 3,
     x: 320,
     y: 280,
     width: 20,
-    height: 20
+    height: 20,
+
+    start() {
+        this.dy = -this.velocity;
+        this.dx = game.random(-this.velocity, this.velocity);
+    },
+
+    move() {
+        if (this.dy) {
+            this.y += this.dy;
+        }
+        if (this.dx) {
+            this.x += this.dx;
+        }
+    }
 }
 
 game.platform = {
@@ -115,6 +144,14 @@ game.platform = {
     dx: 0,
     x: 280,
     y: 300,
+    ball: game.ball,
+
+    fire() {
+        if (this.ball) {
+            this.ball.start();
+            this.ball = null;
+        }
+    },
 
     start(direction) {
         if (direction === keys.left) {
@@ -132,7 +169,9 @@ game.platform = {
     move() {
         if (this.dx) {
             this.x += this.dx;
-            game.ball.x += this.dx;
+            if (this.ball) {
+                this.ball.x += this.dx;
+            }
         }
     }
 };
